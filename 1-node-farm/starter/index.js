@@ -1,6 +1,9 @@
 const fs = require("fs");
 const http = require("http");
 const url = require("url");
+
+const slugify = require("slugify");
+
 const replaceTemplate = require(`${__dirname}/modules/replaceTemplate`);
 
 /////////////////////////////////
@@ -46,8 +49,13 @@ const tempCard = fs.readFileSync(
 const data = fs.readFileSync(`${__dirname}/dev-data/data.json`, "utf-8");
 const dataObj = JSON.parse(data);
 
+// Slugify
+dataObj.map((el) => (el.slugify = slugify(el.productName, { lower: "true" })));
+console.log(dataObj["fresh-avocados"]);
+
+// create Server
 const server = http.createServer((req, res) => {
-	// take quert and pathname from url
+	// take query and pathname from url
 	const { query, pathname } = url.parse(req.url, true);
 
 	// overview Page
