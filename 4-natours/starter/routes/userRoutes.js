@@ -1,8 +1,13 @@
 const express = require('express');
 const userController = require('../controllers/userController');
+const authController = require('../controllers/authController');
 
 // specify new middleware for routes
 const router = express.Router();
+
+// user route with authentication data
+router.post('/signup', authController.signup);
+router.post('/login', authController.login);
 
 // users routes
 router

@@ -1,5 +1,6 @@
 const express = require('express');
 const tourController = require('../controllers/tourController');
+const authController = require('../controllers/authController');
 
 // specify new middleware for routes
 const router = express.Router();
@@ -17,7 +18,10 @@ router.route('/tours-stats').get(tourController.getTourStats);
 // route for monthly plan
 router.route('/monthly-plan/:year').get(tourController.getMonthlyPlan);
 
-router.route('/').get(tourController.getAllTours).post(tourController.addTour);
+router
+  .route('/')
+  .get(authController.protect, tourController.getAllTours)
+  .post(tourController.addTour);
 
 router
   .route('/:id')
