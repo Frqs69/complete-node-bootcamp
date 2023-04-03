@@ -1,3 +1,4 @@
+const crypto = require('crypto');
 const mongoose = require('mongoose');
 const validator = require('validator');
 const bcrypt = require('bcryptjs');
@@ -31,8 +32,15 @@ const userSchema = new mongoose.Schema({
       message: 'Passwords are not the same',
     },
   },
+  role: {
+    type: String,
+    enum: ['user', 'guide', 'lead-guide', 'admin'],
+    default: 'user',
+  },
   photo: String,
   passwordChangedAt: Date,
+  passwordResetToken: String,
+  passwordResetExpires: Date,
 });
 
 // Middleware
@@ -50,6 +58,15 @@ userSchema.pre('save', async function (next) {
 
   next();
 });
+
+userSchema.pre('save', function (next) {
+  if (!this.isModified('password') || this.isNew) return next();
+
+  this.passwordChangedAt = Date.now() - 1000; // take into consideration database delay
+  next();
+});
+
+//---------------------------------------------------------------------------------------------
 
 // instance method is available for all documents in certain collection
 // check password from login with password from database
@@ -74,6 +91,19 @@ userSchema.methods.changedPasswordAfter = function (JWTTimestamp) {
 
   // False means NOT changed
   return false;
+};
+
+userSchema.methods.createPasswordResetToken = function () {
+  const resetToken = crypto.randomBytes(32).toString('hex');
+
+  this.passwordResetToken = crypto
+    .createHash('sha256')
+    .update(resetToken)
+    .digest('hex');
+
+  this.passwordResetExpires = Date.now() + 10 * 60 * 1000; // 10 minutes password live
+
+  return resetToken;
 };
 
 //create model
