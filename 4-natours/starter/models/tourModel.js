@@ -1,6 +1,7 @@
 const mongoose = require('mongoose');
 const slugify = require('slugify');
 const validator = require('validator');
+// const User = require('./userModel');
 
 // create simple schema tour model mongoose
 //create schema ( first object for definition, second object for options)
@@ -80,6 +81,38 @@ const tourSchema = new mongoose.Schema(
       type: Boolean,
       default: false,
     },
+    startLocation: {
+      // GeoJSON
+      type: {
+        type: String,
+        default: 'Point',
+        enum: ['Point'],
+      },
+      coordinates: [Number],
+      address: String,
+      description: String,
+    },
+    locations: [
+      {
+        type: {
+          type: String,
+          default: 'Point',
+          enum: ['Point'],
+        },
+        coordinates: [Number],
+        address: String,
+        description: String,
+        day: Number,
+      },
+    ],
+    // guides: Array,  works for embedding documents
+    //works for child referencing
+    guides: [
+      {
+        type: mongoose.Schema.ObjectId,
+        ref: 'User',
+      },
+    ],
   },
   {
     toJSON: { virtuals: true }, // need to be specified when we want to see durationWeeks in api
@@ -101,6 +134,15 @@ tourSchema.pre('save', function (next) {
   next();
 });
 
+// add users from USERS array to document in pre save middleware - TEST HOW EMBEDDING WORKS
+// tourSchema.pre('save', async function (next) {
+// get promises of users by id given when creating new tour
+// const guidesPromises = this.guides.map(async (id) => await User.findById(id));
+// consume promises and add them to guides in new tour in guides array
+// this.guides = await Promise.all(guidesPromises);
+// next();
+// });
+
 // post middleware - after document will be saved to database, after pre middleware functions
 // tourSchema.post('save', function (doc, next) {
 //   console.log(doc);
@@ -112,6 +154,18 @@ tourSchema.pre('save', function (next) {
 //using regular expression to use this pre middleware for all find methods
 tourSchema.pre(/^find/, function (next) {
   this.find({ secretTour: { $ne: true } });
+  next();
+});
+
+// middleware to pupulate query - add second query to original query
+// e.g. when tours have guides. 
+// This add all guides with id is in array to tour query
+tourSchema.pre(/^find/, function (next) {
+  this.populate({
+    path: 'guides',
+    select: '-__v -passwordChangedAt',
+  });
+
   next();
 });
 
