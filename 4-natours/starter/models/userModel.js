@@ -41,6 +41,11 @@ const userSchema = new mongoose.Schema({
   passwordChangedAt: Date,
   passwordResetToken: String,
   passwordResetExpires: Date,
+  active: {
+    type: Boolean,
+    default: true,
+    select: false,
+  },
 });
 
 // Middleware
@@ -59,10 +64,18 @@ userSchema.pre('save', async function (next) {
   next();
 });
 
+// if password was modified, add passwordChangeAt field to user account
 userSchema.pre('save', function (next) {
   if (!this.isModified('password') || this.isNew) return next();
 
   this.passwordChangedAt = Date.now() - 1000; // take into consideration database delay
+  next();
+});
+
+// filter daa to not see inactive users in 'Get all users' query
+userSchema.pre(/^find/, function (next) {
+  this.find({ active: { $ne: false } });
+
   next();
 });
 

@@ -1,12 +1,21 @@
 const express = require('express');
 const morgan = require('morgan');
+const rateLimit = require('express-rate-limit');
+const helmet = require('helmet');
+const mongoSanitize = require('express-mongo-sanitize');
+const xss = require('xss-clean');
+const hpp = require('hpp');
+
 const userRouter = require('./routes/userRoutes');
 const tourRouter = require('./routes/tourRoutes');
 const appError = require('./utils/appError');
 const globalErrorHandler = require('./controllers/errorController');
 const app = express();
 
-// -------------- MIDDLEWARES -----------------------------
+// -------------- GLOBAL MIDDLEWARES -----------------------------
+// Secure HTP headers using npm package helmet
+app.use(helmet());
+
 // if we are on dev mode use morgan
 // console.log(process.env.NODE_ENV)
 if (process.env.NODE_ENV === 'development') {
@@ -14,9 +23,43 @@ if (process.env.NODE_ENV === 'development') {
   app.use(morgan('dev'));
 }
 
+// middleware, which count how many request was sent from IP to prevent hacker attack
+// define how many request from IP can be sent in amount of time
+// using it only for API
+// for this purpose we use npm package express-rate-limit
+const limiter = rateLimit({
+  max: 100,
+  windowMs: 60 * 60 * 1000,
+  message: 'Too many requests from this IP, please try again in an hour',
+});
+app.use('/api', limiter);
+
 //middleware - between requests and responses
-app.use(express.json());
-// static files in middleware
+// body parser, reading data from body into req.body limited to 10kb
+app.use(express.json({ limit: '10kb' }));
+
+// prevent from malicious code
+// Data sanitization against NoSQL query injection - npm package express-mongo-sanitize
+app.use(mongoSanitize());
+
+// Data sanitization against XSS (cross site scripting) - npm package xss-clean
+app.use(xss());
+
+// Prevent Parameter Pollution - npm package hpp
+app.use(
+  hpp({
+    whitelist: [
+      'duration',
+      'ratingsQuantity',
+      'ratingsAverage',
+      'maxGroupSize',
+      'difficulty',
+      'price',
+    ],
+  })
+);
+
+// serving static files in middleware
 app.use(express.static(`${__dirname}/public`));
 
 // create own middleware
@@ -25,9 +68,9 @@ app.use(express.static(`${__dirname}/public`));
 //   next();
 // });
 
+// Test middleware
 app.use((req, res, next) => {
   req.requestTime = new Date().toISOString();
-  console.log(req.headers)
   next();
 });
 
