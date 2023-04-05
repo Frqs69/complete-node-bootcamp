@@ -8,6 +8,8 @@ const hpp = require('hpp');
 
 const userRouter = require('./routes/userRoutes');
 const tourRouter = require('./routes/tourRoutes');
+const reviewRouter = require('./routes/reviewRoutes')
+
 const appError = require('./utils/appError');
 const globalErrorHandler = require('./controllers/errorController');
 const app = express();
@@ -95,6 +97,7 @@ app.use((req, res, next) => {
 // mounting new router on a route
 app.use('/api/v1/tours', tourRouter);
 app.use('/api/v1/users', userRouter);
+app.use('/api/v1/reviews', reviewRouter);
 
 //handle other routes which not exist - need to be last route
 app.all('*', (req, res, next) => {
