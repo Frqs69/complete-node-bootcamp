@@ -14,15 +14,19 @@ router.post('/login', authController.login);
 // routes for password change
 router.post('/forgotPassword', authController.forgotPassword);
 router.patch('/resetPassword/:token', authController.resetPassword);
-router.patch(
-  '/updateMyPassword',
-  authController.protect,
-  authController.updatePassword
-);
+
+// all routes under this middleware will be protected ( only logged user can access this routes)
+router.use(authController.protect);
+
+router.patch('/updateMyPassword', authController.updatePassword);
 
 //routes for changing user data
+router.get('/me', userController.getMe, userController.getUser);
 router.patch('/updateMe', authController.protect, userController.updateMe);
 router.delete('/deleteMe', authController.protect, userController.deleteMe);
+
+// all routes under this middleware are protected (only admin can access this routes)
+router.use(authController.restrictTo('admin'));
 
 // users routes
 router
