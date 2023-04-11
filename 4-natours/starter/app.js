@@ -1,3 +1,4 @@
+const path = require('path');
 const express = require('express');
 const morgan = require('morgan');
 const rateLimit = require('express-rate-limit');
@@ -5,16 +6,27 @@ const helmet = require('helmet');
 const mongoSanitize = require('express-mongo-sanitize');
 const xss = require('xss-clean');
 const hpp = require('hpp');
+const pug = require('pug');
 
 const userRouter = require('./routes/userRoutes');
 const tourRouter = require('./routes/tourRoutes');
-const reviewRouter = require('./routes/reviewRoutes')
+const reviewRouter = require('./routes/reviewRoutes');
+const viewRouter = require('./routes/viewRoutes');
 
 const appError = require('./utils/appError');
 const globalErrorHandler = require('./controllers/errorController');
 const app = express();
 
+// set template engine to pug (express supports it)
+app.set('view engine', 'pug');
+app.set('views', 'views');
+
 // -------------- GLOBAL MIDDLEWARES -----------------------------
+
+// serving static files in middleware
+app.use(express.static(path.join(__dirname, 'public')));
+// app.use(express.static(path.join(__dirname, 'public')));
+
 // Secure HTP headers using npm package helmet
 app.use(helmet());
 
@@ -61,9 +73,6 @@ app.use(
   })
 );
 
-// serving static files in middleware
-app.use(express.static(`${__dirname}/public`));
-
 // create own middleware
 // app.use((req, res, next) => {
 //   console.log('Hello from middleware');
@@ -95,6 +104,7 @@ app.use((req, res, next) => {
 // ------------- ROUTES better way ---------------------------
 
 // mounting new router on a route
+app.use('/', viewRouter);
 app.use('/api/v1/tours', tourRouter);
 app.use('/api/v1/users', userRouter);
 app.use('/api/v1/reviews', reviewRouter);
