@@ -7,6 +7,7 @@ const mongoSanitize = require('express-mongo-sanitize');
 const xss = require('xss-clean');
 const hpp = require('hpp');
 const pug = require('pug');
+const cors = require('cors');
 
 const userRouter = require('./routes/userRoutes');
 const tourRouter = require('./routes/tourRoutes');
@@ -29,6 +30,14 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 // Secure HTP headers using npm package helmet
 app.use(helmet());
+
+// disable CORS for this application - REALLY HELP FULL
+const corsOptions = {
+  origin: 'http://localhost:3000',
+  credentials: true, //access-control-allow-credentials:true
+  optionSuccessStatus: 200,
+};
+app.use(cors(corsOptions));
 
 // if we are on dev mode use morgan
 // console.log(process.env.NODE_ENV)

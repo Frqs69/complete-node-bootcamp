@@ -1,5 +1,8 @@
 extends base
 
+block append head 
+    script(defer src='/js/mapbox.js' type='module')
+
 mixin overviewBox(label, text, icon)
     .overview-box__detail
         svg.overview-box__icon
@@ -70,8 +73,8 @@ block content
             .picture-box
                 img.picture-box__img(src=`/img/tours/${img}`, alt=`${tour.name} tour ${i + 1}`, class=`picture-box__img--${i+1}`)
 
-    section.section-map
-        #map
+    //- section.section-map
+    //-     #map(data-locations=`${JSON.stringify(tour.locations)}`)
 
     section.section-reviews
         .reviews
