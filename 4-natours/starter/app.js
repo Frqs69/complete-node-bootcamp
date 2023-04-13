@@ -8,6 +8,7 @@ const xss = require('xss-clean');
 const hpp = require('hpp');
 const pug = require('pug');
 const cors = require('cors');
+const cookieParser = require('cookie-parser');
 
 const userRouter = require('./routes/userRoutes');
 const tourRouter = require('./routes/tourRoutes');
@@ -60,6 +61,8 @@ app.use('/api', limiter);
 //middleware - between requests and responses
 // body parser, reading data from body into req.body limited to 10kb
 app.use(express.json({ limit: '10kb' }));
+// parse data from cookies
+app.use(cookieParser());
 
 // prevent from malicious code
 // Data sanitization against NoSQL query injection - npm package express-mongo-sanitize
@@ -91,6 +94,7 @@ app.use(
 // Test middleware
 app.use((req, res, next) => {
   req.requestTime = new Date().toISOString();
+  console.log(req.cookies );
   next();
 });
 
@@ -136,3 +140,10 @@ app.all('*', (req, res, next) => {
 app.use(globalErrorHandler);
 
 module.exports = app;
+
+// kwiatowa 20 kazuń bielany
+// koszt podłaczenia
+// kiedy podłaczenie
+// koszt utrzymania
+// 300 przyłącze  metr 10 zł - 1 zł
+//
