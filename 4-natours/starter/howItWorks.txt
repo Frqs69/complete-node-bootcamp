@@ -1,0 +1,8 @@
+1. npm start - in starter folder to start server
+2. npm run watch:js - in starter folder for watching js module bundler
+3. open http://127.0.0.1:3000/ in browser
+
+postman is Natours folder
+
+Stopped on https://www.udemy.com/course/nodejs-express-mongodb-bootcamp/learn/lecture/15087368#overview
+209. Using Sendgrid for "Real" Emails

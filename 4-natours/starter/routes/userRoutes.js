@@ -23,7 +23,13 @@ router.patch('/updateMyPassword', authController.updatePassword);
 
 //routes for changing user data
 router.get('/me', userController.getMe, userController.getUser);
-router.patch('/updateMe', authController.protect, userController.updateMe);
+router.patch(
+  '/updateMe',
+  authController.protect,
+  userController.uploadUserPhoto,
+  userController.resizeUserPhoto,
+  userController.updateMe
+);
 router.delete('/deleteMe', authController.protect, userController.deleteMe);
 
 // all routes under this middleware are protected (only admin can access this routes)
